@@ -1,5 +1,6 @@
 package com.senac.ControlaStock.config;
 
+import com.senac.ControlaStock.model.Usuario;
 import com.senac.ControlaStock.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -21,48 +21,45 @@ public class JwtFilter extends OncePerRequestFilter {
     private TokenService tokenService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
 
-        if(path.equals("/auth/login")
+        if (path.equals("/auth/login")
                 || path.startsWith("/swagger-resources")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/webjars")
-                || path.startsWith("/swagger-ui")){
+                || path.startsWith("/swagger-ui")) {
 
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(request, response);
             return;
         }
 
         try {
             String header = request.getHeader("Authorization");
 
-            if(header != null && header.startsWith("Bearer ")){
+            if (header != null && header.startsWith("Bearer ")) {
                 String token = header.replace("Bearer ", "");
-                String user = tokenService.validarToken(token); // ✅ já retorna o subject
+                Usuario usuario = tokenService.validarToken(token);
 
-                if(user != null && !user.isEmpty()){
-                    var autorizacao = new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            Collections.emptyList());
+                var autorizacao = new UsernamePasswordAuthenticationToken(
+                        usuario,
+                        null,
+                        usuario.getAuthorities()
+                );
 
-                    SecurityContextHolder.getContext().setAuthentication(autorizacao);
-                }
-
-                filterChain.doFilter(request,response);
+                SecurityContextHolder.getContext().setAuthentication(autorizacao);
+                filterChain.doFilter(request, response);
 
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Token não informado!");
-                return;
             }
 
-        } catch(Exception e){
+        } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Token inválido!");
-            return;
+            response.getWriter().write("Token inválido ou expirado!");
         }
     }
 }

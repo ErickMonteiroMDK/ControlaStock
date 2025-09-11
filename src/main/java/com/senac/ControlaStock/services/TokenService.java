@@ -34,15 +34,13 @@ public class TokenService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public String gerarToken(LoginRequestDto) {
-        var usuario = usuarioRepository.findByEmail(LoginRequestDto.email())
-                .orElseThrow(() -> new IllegalArgumentException("Usuario não encontrado"));
-
+    // Método corrigido - recebe um objeto Usuario ao invés de LoginRequestDto
+    public String gerarToken(Usuario usuario) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         String token = JWT.create()
                 .withIssuer(emissor)
-                .withSubject(usuario.getEmail())
+                .withSubject(usuario.getEmail()) // Assumindo que Usuario tem método getEmail()
                 .withExpiresAt(this.gerarDataExpiracao())
                 .sign(algorithm);
 
@@ -51,20 +49,25 @@ public class TokenService {
     }
 
     public Usuario validarToken(String token) {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
-        JWTVerifier verifier = JWT.require(algorithm)
-                .withIssuer(emissor)
-                .build();
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withIssuer(emissor)
+                    .build();
 
-        verifier.verify(token);
+            verifier.verify(token);
 
-        var tokenResult = tokenRepository.findByToken(token).orElse(null);
+            var tokenResult = tokenRepository.findByToken(token).orElse(null);
 
-        if (tokenResult == null) {
-            throw new IllegalArgumentException("Token inválido");
+            if (tokenResult == null) {
+                throw new IllegalArgumentException("Token inválido");
+            }
+
+            return tokenResult.getUsuario();
+
+        } catch (JWTVerificationException e) {
+            throw new IllegalArgumentException("Token inválido ou expirado");
         }
-
-        return tokenResult.getUsuario();
     }
 
     private Instant gerarDataExpiracao() {
