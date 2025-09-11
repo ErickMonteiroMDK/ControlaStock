@@ -35,31 +35,33 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        try{
+        try {
             String header = request.getHeader("Authorization");
 
-            if(header!= null && header.startsWith("Bearer ")){
+            if(header != null && header.startsWith("Bearer ")){
                 String token = header.replace("Bearer ", "");
-                String user = tokenService.validarToken(token);
+                String user = tokenService.validarToken(token); // ✅ já retorna o subject
 
-                var autorizacao = new UsernamePasswordAuthenticationToken(
-                        user,
-                        null,
-                        Collections.emptyList());
+                if(user != null && !user.isEmpty()){
+                    var autorizacao = new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            Collections.emptyList());
 
-                SecurityContextHolder.getContext().setAuthentication(autorizacao);
+                    SecurityContextHolder.getContext().setAuthentication(autorizacao);
+                }
 
                 filterChain.doFilter(request,response);
 
-            }else{
+            } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Token não informado!");
                 return;
             }
 
-        }catch(Exception e){
+        } catch(Exception e){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Token não informado!");
+            response.getWriter().write("Token inválido!");
             return;
         }
     }

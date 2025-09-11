@@ -19,6 +19,6 @@ public class ItemInventario {
     private long id;
 
     private String nome;
-    private int quantidade;
+    private Integer quantidade;
     private String localizacao;
 }

@@ -31,11 +31,10 @@ public class TokenService {
             String token = JWT.create()
                     .withIssuer(EMISSOR)
                     .withSubject(usuario.getUsername())
-                    .withExpiresAt(gerarDataExpiracao())
+                    .withExpiresAt(this.gerarDataExpiracao())
                     .sign(algorithm);
 
-            tokenRepository.save(new Token(null, token, usuario.getUsername()));
-
+            tokenRepository.save(new Token(null, token, usuario));
             return token;
         } catch (Exception e) {
             throw new RuntimeException("Erro ao gerar token JWT", e);
