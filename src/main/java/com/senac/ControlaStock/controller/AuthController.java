@@ -2,7 +2,6 @@ package com.senac.ControlaStock.controller;
 
 import com.senac.ControlaStock.dto.LoginRequestDto;
 import com.senac.ControlaStock.model.Usuario;
-import com.senac.ControlaStock.repository.UsuarioRepository;
 import com.senac.ControlaStock.services.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
