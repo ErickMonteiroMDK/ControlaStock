@@ -1,12 +1,16 @@
 package com.senac.ControlaStock.services;
 
+import com.senac.ControlaStock.dto.ItemInventarioRequestDto;
+import com.senac.ControlaStock.dto.ItemInventarioResponseDto;
 import com.senac.ControlaStock.model.ItemInventario;
 import com.senac.ControlaStock.repository.ItemInventarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemInventarioService {
@@ -14,33 +18,83 @@ public class ItemInventarioService {
     @Autowired
     private ItemInventarioRepository itemInventarioRepository;
 
-    public List<ItemInventario> listarTodos() {
-        return itemInventarioRepository.findAll();
+    public List<ItemInventarioResponseDto> listarTodos() {
+        return itemInventarioRepository.findAll()
+                .stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
 
-    public Optional<ItemInventario> buscarPorId(Long id) {
-        return itemInventarioRepository.findById(id);
+    public ItemInventarioResponseDto buscarPorId(Long id) {
+        ItemInventario item = itemInventarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado."));
+        return toResponseDto(item);
     }
 
-    public Optional<ItemInventario> buscarPorNome(String nome) {
-        return itemInventarioRepository.findByNome(nome);
+    public ItemInventarioResponseDto criarItem(ItemInventarioRequestDto requestDto) {
+        ItemInventario novoItem = toEntity(requestDto);
+        ItemInventario itemSalvo = itemInventarioRepository.save(novoItem);
+        return toResponseDto(itemSalvo);
     }
 
-    public ItemInventario salvar(ItemInventario itemInventario) {
-        return itemInventarioRepository.save(itemInventario);
+    public ItemInventarioResponseDto atualizarItem(Long id, ItemInventarioRequestDto requestDto) {
+        ItemInventario itemExistente = itemInventarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado para atualização."));
+
+        itemExistente.setNome(requestDto.nome());
+        itemExistente.setDescricao(requestDto.descricao());
+        itemExistente.setQuantidade(requestDto.quantidade());
+        itemExistente.setLocalizacao(requestDto.localizacao());
+
+        ItemInventario itemAtualizado = itemInventarioRepository.save(itemExistente);
+        return toResponseDto(itemAtualizado);
     }
 
-    public void deletar(Long id) {
+    public void removerItem(Long id) {
+        if (!itemInventarioRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado para remoção.");
+        }
         itemInventarioRepository.deleteById(id);
     }
 
-    public ItemInventario atualizarQuantidade(Long id, Integer novaQuantidade) {
-        return itemInventarioRepository.findById(id)
-                .map(item -> {
-                    item.setQuantidade(novaQuantidade);
-                    return itemInventarioRepository.save(item);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Item não encontrado com ID: " + id));
+    public ItemInventarioResponseDto adicionarQuantidade(Long id, Integer quantidade) {
+        ItemInventario item = itemInventarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado."));
+
+        item.setQuantidade(item.getQuantidade() + quantidade);
+        ItemInventario itemAtualizado = itemInventarioRepository.save(item);
+        return toResponseDto(itemAtualizado);
+    }
+
+    public ItemInventarioResponseDto removerQuantidade(Long id, Integer quantidade) {
+        ItemInventario item = itemInventarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado."));
+
+        if (item.getQuantidade() < quantidade) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade a ser removida é maior que o estoque atual.");
+        }
+
+        item.setQuantidade(item.getQuantidade() - quantidade);
+        ItemInventario itemAtualizado = itemInventarioRepository.save(item);
+        return toResponseDto(itemAtualizado);
+    }
+
+    private ItemInventario toEntity(ItemInventarioRequestDto dto) {
+        ItemInventario entity = new ItemInventario();
+        entity.setNome(dto.nome());
+        entity.setDescricao(dto.descricao());
+        entity.setQuantidade(dto.quantidade());
+        entity.setLocalizacao(dto.localizacao());
+        return entity;
+    }
+
+    private ItemInventarioResponseDto toResponseDto(ItemInventario entity) {
+        return new ItemInventarioResponseDto(
+                entity.getId(),
+                entity.getNome(),
+                entity.getDescricao(),
+                entity.getQuantidade(),
+                entity.getLocalizacao()
+        );
     }
 }
-
