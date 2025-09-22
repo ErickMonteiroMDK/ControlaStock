@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ItemInventarioService {
@@ -34,12 +35,12 @@ public class ItemInventarioService {
     }
 
     public ItemInventario atualizarQuantidade(Long id, Integer novaQuantidade) {
-        Optional<ItemInventario> itemOpt = itemInventarioRepository.findById(id);
-        if (itemOpt.isPresent()) {
-            ItemInventario item = itemOpt.get();
-            item.setQuantidade(novaQuantidade);
-            return itemInventarioRepository.save(item);
-        }
-        throw new IllegalArgumentException("Item não encontrado com ID: " + id);
+        return itemInventarioRepository.findById(id)
+                .map(item -> {
+                    item.setQuantidade(novaQuantidade);
+                    return itemInventarioRepository.save(item);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Item não encontrado com ID: " + id));
     }
 }
+

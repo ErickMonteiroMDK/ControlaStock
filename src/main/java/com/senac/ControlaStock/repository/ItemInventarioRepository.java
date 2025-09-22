@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface
-ItemInventarioRepository extends JpaRepository<ItemInventario, Integer> {
+ItemInventarioRepository extends JpaRepository<ItemInventario, Long> {
 
     Optional<ItemInventario> findByNome(String nome);
 }
