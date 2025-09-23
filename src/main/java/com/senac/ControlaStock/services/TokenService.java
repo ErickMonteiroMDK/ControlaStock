@@ -34,13 +34,12 @@ public class TokenService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // Método corrigido - recebe um objeto Usuario ao invés de LoginRequestDto
     public String gerarToken(Usuario usuario) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         String token = JWT.create()
                 .withIssuer(emissor)
-                .withSubject(usuario.getEmail()) // Assumindo que Usuario tem método getEmail()
+                .withSubject(usuario.getEmail())
                 .withExpiresAt(this.gerarDataExpiracao())
                 .sign(algorithm);
 

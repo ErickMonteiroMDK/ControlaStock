@@ -1,7 +1,6 @@
 package com.senac.ControlaStock.controller;
 
 import com.senac.ControlaStock.dto.UsuarioRequestDto;
-import com.senac.ControlaStock.dto.UsuarioRequestDto;
 import com.senac.ControlaStock.dto.UsuarioResponseDto;
 import com.senac.ControlaStock.services.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
