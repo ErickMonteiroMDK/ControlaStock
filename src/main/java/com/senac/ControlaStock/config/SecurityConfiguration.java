@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,19 +25,22 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/swagger-resources/**").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/usuarios").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/inventario/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/inventario").hasRole("ADMIN")
+                        // Rotas Públicas
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/registrar").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
+                        // Rotas de Usuário
+                        .requestMatchers(HttpMethod.GET, "/api/inventario/**").authenticated()
+
+                        // Rotas de Administrador
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/inventario/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/inventario/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/inventario/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
