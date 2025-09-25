@@ -1,7 +1,6 @@
 package com.senac.ControlaStock.controller;
 
 import com.senac.ControlaStock.dto.LoginRequestDto;
-import com.senac.ControlaStock.dto.LoginResponseDto;
 import com.senac.ControlaStock.dto.UsuarioRequestDto;
 import com.senac.ControlaStock.dto.UsuarioResponseDto;
 import com.senac.ControlaStock.model.Usuario;
