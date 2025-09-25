@@ -26,12 +26,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        if (path.equals("/auth/login")
-                || path.startsWith("/swagger-resources")
+        if (path.equals("/")
+                || path.equals("/health")
+                || path.startsWith("/auth/")
+                || path.startsWith("/swagger-ui/")
+                || path.equals("/swagger-ui.html")
                 || path.startsWith("/v3/api-docs")
-                || path.startsWith("/webjars")
-                || path.startsWith("/swagger-ui")) {
-
+                || path.startsWith("/swagger-resources")
+                || path.startsWith("/webjars/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -54,12 +56,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token não informado!");
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Token não informado\"}");
             }
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Token inválido ou expirado!");
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token inválido ou expirado\"}");
         }
     }
 }
