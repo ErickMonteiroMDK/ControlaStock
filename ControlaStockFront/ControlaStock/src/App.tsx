@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import Menu from './pages/Menu';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -73,27 +75,33 @@ const App: React.FC = () => {
           <Route 
             path="/" 
             element={
-              isLoggedIn ? (
-                <div className="container mt-4">
-                  <div className="text-center">
-                    <h1 className="display-4 text-primary">ControlaStock</h1>
-                    <p className="lead text-muted">Sistema de Controle de Estoque</p>
-                    <p className="text-success">✅ Usuário logado: {userEmail}</p>
-                  </div>
-                </div>
-              ) : (
-                <Navigate to="/login" />
-              )
+              isLoggedIn ? <Navigate to="/menu" /> : <Navigate to="/login" />
             } 
           />
           <Route 
             path="/login" 
             element={
               isLoggedIn ? (
-                <Navigate to="/" />
+                <Navigate to="/menu" />
               ) : (
                 <Login onLogin={handleLogin} />
               )
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              isLoggedIn ? (
+                <Navigate to="/menu" />
+              ) : (
+                <Register onRegister={handleRegister} />
+              )
+            } 
+          />
+          <Route 
+            path="/menu" 
+            element={
+              isLoggedIn ? <Menu /> : <Navigate to="/login" />
             } 
           />
         </Routes>
