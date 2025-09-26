@@ -3,6 +3,7 @@ package com.senac.ControlaStock.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -26,7 +27,8 @@ public class SecurityConfiguration {
     private CorsConfigurationSource corsConfigurationSource;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // Esta é a configuração padrão - COM segurança
+    public SecurityFilterChain secureFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource)) // Usar CORS configurado
                 .csrf(csrf -> csrf.disable()) // Desabilitar CSRF completamente
@@ -51,6 +53,19 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
+    // CONFIGURAÇÃO SEM SEGURANÇA (PARA DEMONSTRAÇÃO)
+    // Descomente o @Bean abaixo e comente o @Primary acima para DESABILITAR a segurança
+    // @Bean
+    // public SecurityFilterChain openFilterChain(HttpSecurity http) throws Exception {
+    //     System.out.println(" ATENÇÃO: SEGURANÇA DESABILITADA - TODOS OS ENDPOINTS ESTÃO ABERTOS!");
+    //     return http
+    //             .cors(cors -> cors.configurationSource(corsConfigurationSource))
+    //             .csrf(csrf -> csrf.disable())
+    //             .authorizeHttpRequests(auth -> auth
+    //                     .anyRequest().permitAll()     //             )
+    //             .build();
+    // }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
