@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5174"}) // CORS específico
 @Tag(name = "Autenticação", description = "Endpoints responsáveis pela autenticação e registro de usuários.")
 public class AuthController {
 
@@ -58,10 +59,15 @@ public class AuthController {
     @Operation(summary = "Registra um novo usuário", description = "Cria um novo usuário no sistema e retorna seus dados sem a senha.")
     public ResponseEntity<UsuarioResponseDto> registrar(@Valid @RequestBody UsuarioRequestDto usuarioRequestDto) {
         try {
+            System.out.println("AuthController - Recebida requisição de registro para: " + usuarioRequestDto.email());
             UsuarioResponseDto novoUsuario = usuarioService.criarUsuario(usuarioRequestDto);
+            System.out.println("AuthController - Usuário criado com sucesso: " + novoUsuario.email());
             return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            System.err.println("AuthController - Erro ao registrar usuário: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null);
         }
     }
 }

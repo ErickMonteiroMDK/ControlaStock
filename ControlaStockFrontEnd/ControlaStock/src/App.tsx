@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar.tsx';
-import Login from './pages/Login.tsx';
-import Register from './pages/Register.tsx';
-import Menu from './pages/Menu.tsx';
-import Inventory from './pages/Inventory.tsx';
-import { ApiService } from './services/api.ts';
+import Navbar from './components/Navbar';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Menu from './pages/Menu';
+import Inventory from './pages/Inventory';
+import { ApiService } from './services/api';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './App.css';
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [serverOnline, setServerOnline] = useState<boolean>(true);
 
-  // Verificar se o usuário está logado ao inicializar
   useEffect(() => {
-    const checkAuth = (): void => {
+    const initializeApp = async (): Promise<void> => {
+      // Testar conexão com o servidor
+      const isServerOnline = await ApiService.testConnection();
+      setServerOnline(isServerOnline);
+      
+      if (!isServerOnline) {
+        console.error('Servidor não está respondendo');
+      }
+
+      // Verificar autenticação
       const isAuthenticated = ApiService.isLoggedIn();
       const rawUser = ApiService.getCurrentUser();
       
@@ -28,12 +36,12 @@ const App: React.FC = () => {
       setLoading(false);
     };
 
-    checkAuth();
+    initializeApp();
   }, []);
 
   const handleLogin = async (email: string, password: string): Promise<boolean> => {
     try {
-      await ApiService.login(email, password); 
+      await ApiService.login(email, password);
       setIsLoggedIn(true);
       setUserEmail(email);
       return true;
@@ -43,9 +51,9 @@ const App: React.FC = () => {
     }
   };
 
-  const handleRegister = async (email: string, password: string): Promise<boolean> => {
+  const handleRegister = async (nome: string, cpf: string, email: string, password: string): Promise<boolean> => {
     try {
-      await ApiService.register(email, password); 
+      await ApiService.register(nome, cpf, email, password);
       return true;
     } catch (error: unknown) {
       console.error('Erro no registro:', error);
@@ -61,9 +69,29 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Carregando...</span>
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="text-center">
+          <div className="spinner-border text-primary mb-3" role="status">
+            <span className="visually-hidden">Carregando...</span>
+          </div>
+          <p>Conectando ao servidor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!serverOnline) {
+    return (
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <div className="alert alert-danger text-center">
+          <h4>Servidor Offline</h4>
+          <p>Não foi possível conectar ao servidor. Verifique se o backend está rodando.</p>
+          <button 
+            className="btn btn-primary"
+            onClick={() => window.location.reload()}
+          >
+            Tentar Novamente
+          </button>
         </div>
       </div>
     );
@@ -79,44 +107,11 @@ const App: React.FC = () => {
         />
         
         <Routes>
-          <Route 
-            path="/" 
-            element={
-              isLoggedIn ? <Navigate to="/menu" /> : <Navigate to="/login" />
-            } 
-          />
-          <Route 
-            path="/login" 
-            element={
-              isLoggedIn ? (
-                <Navigate to="/menu" />
-              ) : (
-                <Login onLogin={handleLogin} />
-              )
-            } 
-          />
-          <Route 
-            path="/register" 
-            element={
-              isLoggedIn ? (
-                <Navigate to="/menu" />
-              ) : (
-                <Register onRegister={handleRegister} />
-              )
-            } 
-          />
-          <Route 
-            path="/menu" 
-            element={
-              isLoggedIn ? <Menu /> : <Navigate to="/login" />
-            } 
-          />
-          <Route 
-            path="/inventory" 
-            element={
-              isLoggedIn ? <Inventory /> : <Navigate to="/login" />
-            } 
-          />
+          <Route path="/" element={isLoggedIn ? <Navigate to="/menu" /> : <Navigate to="/login" />} />
+          <Route path="/login" element={isLoggedIn ? <Navigate to="/menu" /> : <Login onLogin={handleLogin} />} />
+          <Route path="/registrar" element={isLoggedIn ? <Navigate to="/menu" /> : <Register onRegister={handleRegister} />} />
+          <Route path="/menu" element={isLoggedIn ? <Menu /> : <Navigate to="/login" />} />
+          <Route path="/inventory" element={isLoggedIn ? <Inventory /> : <Navigate to="/login" />} />
         </Routes>
       </div>
     </Router>

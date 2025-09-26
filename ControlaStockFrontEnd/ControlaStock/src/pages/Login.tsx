@@ -38,90 +38,110 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setLoading(false);
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setEmail(e.target.value);
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setPassword(e.target.value);
-  };
-
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6 col-lg-4">
-          <div className="card shadow">
-            <div className="card-body">
-              <h2 className="card-title text-center mb-4 text-primary">
-                <strong>Login</strong>
-              </h2>
+    <div className="auth-main-bg d-flex align-items-center justify-content-center min-vh-100 p-3">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-12 col-md-8 col-lg-6 col-xl-5">
+            
+            {/* Card Principal */}
+            <div className="auth-main-card">
               
-              {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
+              {/* Header com Gradiente */}
+              <div className="auth-header">
+                <span className="auth-icon">🔐</span>
+                <h1 className="auth-title">Bem-vindo de Volta</h1>
+                <p className="auth-subtitle">Entre na sua conta ControlaStock</p>
+              </div>
+
+              {/* Corpo do Card */}
+              <div className="auth-body">
+                
+                {/* Mensagem de Erro */}
+                {error && (
+                  <div className="alert alert-danger alert-modern d-flex align-items-center mb-4">
+                    <i className="bi bi-shield-exclamation me-3 fs-5"></i>
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {/* Formulário */}
+                <form onSubmit={handleSubmit}>
+                  
+                  {/* Campo Email */}
+                  <div className="form-group">
+                    <label htmlFor="email" className="form-label">
+                      <i className="bi bi-envelope-fill"></i>
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      required
+                    />
+                  </div>
+
+                  {/* Campo Senha */}
+                  <div className="form-group">
+                    <label htmlFor="password" className="form-label">
+                      <i className="bi bi-lock-fill"></i>
+                      Senha
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Sua senha"
+                      required
+                    />
+                  </div>
+
+                  {/* Botão de Entrar */}
+                  <button
+                    type="submit"
+                    className="btn btn-primary-modern w-100 py-3"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-modern"></span>
+                        ENTRANDO...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-box-arrow-in-right me-2"></i>
+                        ENTRAR NA CONTA
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Link para Registro */}
+                <div className="auth-switch">
+                  <p className="mb-0 text-muted">
+                    Não tem uma conta?{' '}
+                    <Link to="/register" className="fw-bold">
+                      Criar conta agora
+                    </Link>
+                  </p>
                 </div>
-              )}
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    value={email}
-                    onChange={handleEmailChange}
-                    placeholder="Digite seu email"
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Senha
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    placeholder="Digite sua senha"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <span 
-                        className="spinner-border spinner-border-sm me-2" 
-                        role="status"
-                        aria-hidden="true"
-                      ></span>
-                      Entrando...
-                    </>
-                  ) : (
-                    'Entrar'
-                  )}
-                </button>
-              </form>
-
-              <div className="text-center mt-3">
-                <p className="mb-0">
-                  Não tem uma conta?{' '}
-                  <Link to="/register" className="text-primary">
-                    Registre-se aqui
-                  </Link>
-                </p>
               </div>
             </div>
+
+            {/* Footer */}
+            <div className="auth-footer mt-4">
+              <p className="mb-0">
+                © 2024 ControlaStock - Sistema de Gestão de Estoque
+              </p>
+            </div>
+
           </div>
         </div>
       </div>

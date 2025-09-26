@@ -1,21 +1,22 @@
 import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Inventory from '../pages/Inventory';
 import Login from '../pages/Login';
 import Menu from '../pages/Menu';
 import Register from '../pages/Register';
 import { ApiService } from '../services/api';
 
-// Componente para rotas protegidas
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isLoggedIn = ApiService.isLoggedIn();
   return isLoggedIn ? <>{children}</> : <Navigate to="/login" />;
 };
 
-export function AppRoutes() {
+const RootRedirect: React.FC = () => {
   const isLoggedIn = ApiService.isLoggedIn();
+  return isLoggedIn ? <Navigate to="/menu" /> : <Navigate to="/login" />;
+};
 
-  // Função para lidar com login
+export function AppRoutes() {
   const handleLogin = async (email: string, password: string): Promise<boolean> => {
     try {
       await ApiService.login(email, password);
@@ -26,10 +27,9 @@ export function AppRoutes() {
     }
   };
 
-  // Função para lidar com registro
-  const handleRegister = async (email: string, password: string): Promise<boolean> => {
+  const handleRegister = async (nome: string, cpf: string, email: string, password: string): Promise<boolean> => {
     try {
-      await ApiService.register(email, password);
+      await ApiService.register(nome, cpf, email, password);
       return true;
     } catch (error) {
       console.error('Register error:', error);
@@ -38,17 +38,14 @@ export function AppRoutes() {
   };
 
   return (
-    <Routes>
-      {/* Rotas Públicas */}
-      <Route path="/login" element={<Login onLogin={handleLogin} />} />
-      <Route path="/register" element={<Register onRegister={handleRegister} />} />
-      
-      {/* Rota Raiz: redireciona com base no status de login */}
-      <Route path="/" element={isLoggedIn ? <Navigate to="/menu" /> : <Navigate to="/login" />} />
-      
-      {/* Rotas Protegidas */}
-      <Route path="/menu" element={<PrivateRoute><Menu /></PrivateRoute>} />
-      <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/registrar" element={<Register onRegister={handleRegister} />} />
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/menu" element={<PrivateRoute><Menu /></PrivateRoute>} />
+        <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
+      </Routes>
+    </BrowserRouter>
   );
 }
