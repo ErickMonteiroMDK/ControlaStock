@@ -28,6 +28,7 @@ export interface User {
   cpf: string;
   role: string;
   senha?: string;
+  ultimoAcesso?: string;
   criadoEm?: string;
   atualizadoEm?: string;
 }
