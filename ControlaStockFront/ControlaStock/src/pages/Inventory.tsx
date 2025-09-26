@@ -1,24 +1,17 @@
 import React, { useState, useEffect } from 'react';
-
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  quantity: number;
-  price: number;
-  minStock: number;
-  description?: string;
-}
+import { ApiService } from '../services/api';
+import type { Product, CreateProductRequest, UpdateProductRequest } from '../types/api.types';
 
 const Inventory: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
-  // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateProductRequest>({
     name: '',
     category: '',
     quantity: 0,
@@ -28,15 +21,26 @@ const Inventory: React.FC = () => {
   });
 
   useEffect(() => {
-    const savedProducts = localStorage.getItem('controlastock_products');
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    }
+    loadProducts();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('controlastock_products', JSON.stringify(products));
-  }, [products]);
+  const loadProducts = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      const data = await ApiService.getProducts();
+      setProducts(data);
+      setError('');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Erro ao carregar produtos');
+      }
+      console.error('Erro ao carregar produtos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [...new Set(products.map(p => p.category))];
 
@@ -46,27 +50,29 @@ const Inventory: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
-    if (editingProduct) {
-      setProducts(products.map(p => 
-        p.id === editingProduct.id 
-          ? { ...formData, id: editingProduct.id }
-          : p
-      ));
-    } else {
-      const newProduct: Product = {
-        ...formData,
-        id: Date.now()
-      };
-      setProducts([...products, newProduct]);
+    try {
+      if (editingProduct) {
+        const updateData: UpdateProductRequest = { ...formData };
+        await ApiService.updateProduct(editingProduct.id, updateData);
+      } else {
+        await ApiService.createProduct(formData);
+      }
+      
+      await loadProducts();
+      resetForm();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Erro ao salvar produto');
+      }
     }
-
-    resetForm();
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setFormData({
       name: '',
       category: '',
@@ -77,9 +83,10 @@ const Inventory: React.FC = () => {
     });
     setEditingProduct(null);
     setShowModal(false);
+    setError('');
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = (product: Product): void => {
     setFormData({
       name: product.name,
       category: product.category,
@@ -92,16 +99,35 @@ const Inventory: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number): Promise<void> => {
     if (window.confirm('Tem certeza que deseja excluir este produto?')) {
-      setProducts(products.filter(p => p.id !== id));
+      try {
+        await ApiService.deleteProduct(id);
+        await loadProducts(); 
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('Erro ao excluir produto');
+        }
+      }
     }
   };
 
-  const getStockStatus = (quantity: number, minStock: number) => {
+  const getStockStatus = (quantity: number, minStock: number): { text: string; class: string } => {
     if (quantity === 0) return { text: 'Sem estoque', class: 'danger' };
     if (quantity <= minStock) return { text: 'Estoque baixo', class: 'warning' };
     return { text: 'Em estoque', class: 'success' };
+  };
+
+  const handleInputChange = (
+    field: keyof CreateProductRequest, 
+    value: string | number
+  ): void => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -113,12 +139,24 @@ const Inventory: React.FC = () => {
             <button
               className="btn btn-primary"
               onClick={() => setShowModal(true)}
+              type="button"
             >
               + Adicionar Produto
             </button>
           </div>
         </div>
       </div>
+
+      {/* Filtros */}
+      {error && (
+        <div className="row mb-3">
+          <div className="col-12">
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="row mb-4">
         <div className="col-md-6">
@@ -129,7 +167,7 @@ const Inventory: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </div>
+          </div>
         <div className="col-md-3">
           <select
             className="form-select"
@@ -149,9 +187,16 @@ const Inventory: React.FC = () => {
         </div>
       </div>
 
+      {/* Tabela de produtos */}
       <div className="row">
         <div className="col-12">
-          {filteredProducts.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Carregando...</span>
+              </div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="text-center py-5">
               <h5 className="text-muted">Nenhum produto encontrado</h5>
               <p className="text-muted">
@@ -199,12 +244,14 @@ const Inventory: React.FC = () => {
                           <button
                             className="btn btn-sm btn-outline-primary me-1"
                             onClick={() => handleEdit(product)}
+                            type="button"
                           >
                             Editar
                           </button>
                           <button
                             className="btn btn-sm btn-outline-danger"
                             onClick={() => handleDelete(product.id)}
+                            type="button"
                           >
                             Excluir
                           </button>
@@ -219,6 +266,7 @@ const Inventory: React.FC = () => {
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog">
@@ -231,6 +279,7 @@ const Inventory: React.FC = () => {
                   type="button"
                   className="btn-close"
                   onClick={resetForm}
+                  aria-label="Close"
                 ></button>
               </div>
               <form onSubmit={handleSubmit}>
@@ -241,7 +290,7 @@ const Inventory: React.FC = () => {
                       type="text"
                       className="form-control"
                       value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
                       required
                     />
                   </div>
@@ -252,7 +301,7 @@ const Inventory: React.FC = () => {
                       type="text"
                       className="form-control"
                       value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      onChange={(e) => handleInputChange('category', e.target.value)}
                       required
                     />
                   </div>
@@ -266,7 +315,7 @@ const Inventory: React.FC = () => {
                           className="form-control"
                           min="0"
                           value={formData.quantity}
-                          onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 0})}
+                          onChange={(e) => handleInputChange('quantity', parseInt(e.target.value) || 0)}
                           required
                         />
                       </div>
@@ -281,7 +330,7 @@ const Inventory: React.FC = () => {
                           min="0"
                           step="0.01"
                           value={formData.price}
-                          onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
                           required
                         />
                       </div>
@@ -295,7 +344,7 @@ const Inventory: React.FC = () => {
                           className="form-control"
                           min="0"
                           value={formData.minStock}
-                          onChange={(e) => setFormData({...formData, minStock: parseInt(e.target.value) || 0})}
+                          onChange={(e) => handleInputChange('minStock', parseInt(e.target.value) || 0)}
                           required
                         />
                       </div>
@@ -307,8 +356,8 @@ const Inventory: React.FC = () => {
                     <textarea
                       className="form-control"
                       rows={3}
-                      value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      value={formData.description || ''}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
                     ></textarea>
                   </div>
                 </div>

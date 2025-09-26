@@ -1,17 +1,18 @@
+// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 interface LoginProps {
-  onLogin: (email: string, password: string) => boolean;
+  onLogin: (email: string, password: string) => Promise<boolean>;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -22,12 +23,28 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       return;
     }
 
-    const success = onLogin(email, password);
-    if (!success) {
-      setError('Email ou senha incorretos');
+    try {
+      const success = await onLogin(email, password);
+      if (!success) {
+        setError('Email ou senha incorretos');
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Erro ao fazer login');
+      }
     }
     
     setLoading(false);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setEmail(e.target.value);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setPassword(e.target.value);
   };
 
   return (
@@ -56,7 +73,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     className="form-control"
                     id="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     placeholder="Digite seu email"
                     required
                   />
@@ -71,7 +88,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     className="form-control"
                     id="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     placeholder="Digite sua senha"
                     required
                   />
@@ -84,9 +101,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 >
                   {loading ? (
                     <>
-                      <span
-                        className="spinner-border spinner-border-sm me-2"
+                      <span 
+                        className="spinner-border spinner-border-sm me-2" 
                         role="status"
+                        aria-hidden="true"
                       ></span>
                       Entrando...
                     </>

@@ -1,3 +1,4 @@
+// src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -5,64 +6,69 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Menu from './pages/Menu';
 import Inventory from './pages/Inventory';
+import { ApiService } from './services/api';
+import type { User } from './types/api.types';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
-interface User {
-  email: string;
-  password: string;
-}
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>('');
-  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Carregar dados do localStorage ao inicializar
+  // Verificar se usuário está logado ao inicializar
   useEffect(() => {
-    const savedUsers = localStorage.getItem('controlastock_users');
-    const savedLogin = localStorage.getItem('controlastock_logged_user');
-    
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
-    }
-    
-    if (savedLogin) {
-      const loggedUser = JSON.parse(savedLogin);
-      setIsLoggedIn(true);
-      setUserEmail(loggedUser.email);
-    }
+    const checkAuth = (): void => {
+      const isAuthenticated = ApiService.isLoggedIn();
+      const currentUser: User | null = ApiService.getCurrentUser();
+      
+      setIsLoggedIn(isAuthenticated);
+      if (currentUser && currentUser.email) {
+        setUserEmail(currentUser.email);
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
-  const handleLogin = (email: string, password: string): boolean => {
-    const user = users.find(u => u.email === email && u.password === password);
-    if (user) {
+  const handleLogin = async (email: string, password: string): Promise<boolean> => {
+    try {
+      await ApiService.login(email, password);
       setIsLoggedIn(true);
       setUserEmail(email);
-      localStorage.setItem('controlastock_logged_user', JSON.stringify({ email }));
       return true;
-    }
-    return false;
-  };
-
-  const handleRegister = (email: string, password: string): boolean => {
-    const userExists = users.find(u => u.email === email);
-    if (userExists) {
+    } catch (error: unknown) {
+      console.error('Erro no login:', error);
       return false;
     }
-    
-    const newUser = { email, password };
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    localStorage.setItem('controlastock_users', JSON.stringify(updatedUsers));
-    return true;
   };
 
-  const handleLogout = () => {
+  const handleRegister = async (email: string, password: string): Promise<boolean> => {
+    try {
+      await ApiService.register(email, password);
+      return true;
+    } catch (error: unknown) {
+      console.error('Erro no registro:', error);
+      return false;
+    }
+  };
+
+  const handleLogout = (): void => {
+    ApiService.logout();
     setIsLoggedIn(false);
     setUserEmail('');
-    localStorage.removeItem('controlastock_logged_user');
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>

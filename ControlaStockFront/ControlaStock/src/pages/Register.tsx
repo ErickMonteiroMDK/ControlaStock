@@ -1,20 +1,21 @@
+// src/pages/Register.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface RegisterProps {
-  onRegister: (email: string, password: string) => boolean;
+  onRegister: (email: string, password: string) => Promise<boolean>;
 }
 
 const Register: React.FC<RegisterProps> = ({ onRegister }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -38,17 +39,35 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
       return;
     }
 
-    const success = onRegister(email, password);
-    if (success) {
-      setSuccess('Conta criada com sucesso! Redirecionando para o login...');
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } else {
-      setError('Este email já está em uso');
+    try {
+      const success = await onRegister(email, password);
+      if (success) {
+        setSuccess('Conta criada com sucesso! Redirecionando para o login...');
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Erro ao criar conta');
+      }
     }
     
     setLoading(false);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setEmail(e.target.value);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setPassword(e.target.value);
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setConfirmPassword(e.target.value);
   };
 
   return (
@@ -83,7 +102,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                     className="form-control"
                     id="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     placeholder="Digite seu email"
                     required
                   />
@@ -98,7 +117,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                     className="form-control"
                     id="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     placeholder="Digite sua senha (mín. 6 caracteres)"
                     required
                   />
@@ -113,7 +132,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                     className="form-control"
                     id="confirmPassword"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={handleConfirmPasswordChange}
                     placeholder="Confirme sua senha"
                     required
                   />
@@ -127,8 +146,9 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                   {loading ? (
                     <>
                       <span 
-                        className="spinner-border spinner-border-sm me-2"
+                        className="spinner-border spinner-border-sm me-2" 
                         role="status"
+                        aria-hidden="true"
                       ></span>
                       Criando conta...
                     </>
