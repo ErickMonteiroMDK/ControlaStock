@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Menu from './pages/Menu';
+import Inventory from './pages/Inventory';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [users, setUsers] = useState<User[]>([]);
 
+  // Carregar dados do localStorage ao inicializar
   useEffect(() => {
     const savedUsers = localStorage.getItem('controlastock_users');
     const savedLogin = localStorage.getItem('controlastock_logged_user');
@@ -102,6 +104,12 @@ const App: React.FC = () => {
             path="/menu" 
             element={
               isLoggedIn ? <Menu /> : <Navigate to="/login" />
+            } 
+          />
+          <Route 
+            path="/inventory" 
+            element={
+              isLoggedIn ? <Inventory /> : <Navigate to="/login" />
             } 
           />
         </Routes>
