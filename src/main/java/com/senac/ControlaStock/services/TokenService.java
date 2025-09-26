@@ -12,6 +12,7 @@ import com.senac.ControlaStock.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -47,6 +48,7 @@ public class TokenService {
         return token;
     }
 
+    @Transactional // Adicionar transação para evitar problemas de sessão
     public Usuario validarToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -54,18 +56,23 @@ public class TokenService {
                     .withIssuer(emissor)
                     .build();
 
-            verifier.verify(token);
+            var payload = verifier.verify(token);
+            String email = payload.getSubject(); // Extrair email do token
 
+            // CORREÇÃO: Buscar usuário diretamente pelo email em vez de usar a relação lazy
+            Usuario usuario = usuarioRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+            // Verificar se token existe no banco (opcional - para maior segurança)
             var tokenResult = tokenRepository.findByToken(token).orElse(null);
-
             if (tokenResult == null) {
                 throw new IllegalArgumentException("Token inválido");
             }
 
-            return tokenResult.getUsuario();
+            return usuario;
 
         } catch (JWTVerificationException e) {
-            throw new IllegalArgumentException("Token inválido ou expirado");
+            throw new IllegalArgumentException("Token inválido ou expirado: " + e.getMessage());
         }
     }
 

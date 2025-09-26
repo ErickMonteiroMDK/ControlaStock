@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
+// import Navbar from './components/Navbar'; // REMOVIDO - estava causando duplicação
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Menu from './pages/Menu';
@@ -11,7 +11,6 @@ import './App.css';
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userEmail, setUserEmail] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [serverOnline, setServerOnline] = useState<boolean>(true);
 
@@ -27,12 +26,8 @@ const App: React.FC = () => {
 
       // Verificar autenticação
       const isAuthenticated = ApiService.isLoggedIn();
-      const rawUser = ApiService.getCurrentUser();
       
       setIsLoggedIn(isAuthenticated);
-      if (rawUser && typeof rawUser.email === 'string') {
-        setUserEmail(rawUser.email);
-      }
       setLoading(false);
     };
 
@@ -43,7 +38,6 @@ const App: React.FC = () => {
     try {
       await ApiService.login(email, password);
       setIsLoggedIn(true);
-      setUserEmail(email);
       return true;
     } catch (error: unknown) {
       console.error('Erro no login:', error);
@@ -61,10 +55,10 @@ const App: React.FC = () => {
     }
   };
 
+  // Adicionar função de logout que atualiza o estado
   const handleLogout = (): void => {
     ApiService.logout();
     setIsLoggedIn(false);
-    setUserEmail('');
   };
 
   if (loading) {
@@ -100,17 +94,13 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="App">
-        <Navbar 
-          isLoggedIn={isLoggedIn} 
-          userEmail={userEmail} 
-          onLogout={handleLogout}
-        />
+        {/* NAVBAR REMOVIDA - cada página gerencia sua própria navbar */}
         
         <Routes>
           <Route path="/" element={isLoggedIn ? <Navigate to="/menu" /> : <Navigate to="/login" />} />
           <Route path="/login" element={isLoggedIn ? <Navigate to="/menu" /> : <Login onLogin={handleLogin} />} />
           <Route path="/registrar" element={isLoggedIn ? <Navigate to="/menu" /> : <Register onRegister={handleRegister} />} />
-          <Route path="/menu" element={isLoggedIn ? <Menu /> : <Navigate to="/login" />} />
+          <Route path="/menu" element={isLoggedIn ? <Menu onLogout={handleLogout} /> : <Navigate to="/login" />} />
           <Route path="/inventory" element={isLoggedIn ? <Inventory /> : <Navigate to="/login" />} />
         </Routes>
       </div>

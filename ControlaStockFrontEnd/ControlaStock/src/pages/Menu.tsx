@@ -1,14 +1,17 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ApiService } from '../services/api';
 
-const Menu: React.FC = () => {
-  const navigate = useNavigate();
+// Interface para as props do componente
+interface MenuProps {
+  onLogout: () => void;
+}
+
+const Menu: React.FC<MenuProps> = ({ onLogout }) => {
   const user = ApiService.getCurrentUser();
 
   const handleLogout = () => {
-    ApiService.logout();
-    navigate('/login');
+    onLogout(); // Chama a função do App.tsx que atualiza o estado
   };
 
   const menuItems = [

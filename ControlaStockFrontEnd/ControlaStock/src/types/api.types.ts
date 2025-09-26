@@ -2,31 +2,23 @@
 export interface InventoryItem {
   id: number;
   nome: string;
-  categoria: string;
-  quantidade: number;
-  preco: number;
-  estoqueMinimo: number;
   descricao?: string;
-  criadoEm?: string;
-  atualizadoEm?: string;
+  quantidade: number;
+  localizacao: string;
 }
 
 export interface CreateInventoryItemRequest {
   nome: string;
-  categoria: string;
-  quantidade: number;
-  preco: number;
-  estoqueMinimo: number;
   descricao?: string;
+  quantidade: number;
+  localizacao?: string; // Opcional no frontend, será preenchido automaticamente no backend se vazio
 }
 
 export interface UpdateInventoryItemRequest {
   nome: string;
-  categoria: string;
-  quantidade: number;
-  preco: number;
-  estoqueMinimo: number;
   descricao?: string;
+  quantidade: number;
+  localizacao?: string;
 }
 
 export interface User {
@@ -82,4 +74,3 @@ export interface RegisterResponse {
   nome?: string;
   createdAt?: string;
 }
-

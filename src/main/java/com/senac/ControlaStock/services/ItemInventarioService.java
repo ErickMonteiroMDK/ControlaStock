@@ -44,7 +44,13 @@ public class ItemInventarioService {
         itemExistente.setNome(requestDto.nome());
         itemExistente.setDescricao(requestDto.descricao());
         itemExistente.setQuantidade(requestDto.quantidade());
-        itemExistente.setLocalizacao(requestDto.localizacao());
+
+        // Aplicar a mesma lógica de valor padrão para atualização
+        String localizacao = requestDto.localizacao();
+        if (localizacao == null || localizacao.trim().isEmpty()) {
+            localizacao = "Estoque Principal";
+        }
+        itemExistente.setLocalizacao(localizacao);
 
         ItemInventario itemAtualizado = itemInventarioRepository.save(itemExistente);
         return toResponseDto(itemAtualizado);
@@ -84,7 +90,14 @@ public class ItemInventarioService {
         entity.setNome(dto.nome());
         entity.setDescricao(dto.descricao());
         entity.setQuantidade(dto.quantidade());
-        entity.setLocalizacao(dto.localizacao());
+
+        // Define valor padrão se localização for nula ou vazia
+        String localizacao = dto.localizacao();
+        if (localizacao == null || localizacao.trim().isEmpty()) {
+            localizacao = "Estoque Principal"; // valor padrão
+        }
+        entity.setLocalizacao(localizacao);
+
         return entity;
     }
 

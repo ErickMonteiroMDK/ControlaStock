@@ -11,17 +11,14 @@ const Inventory: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<InventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
   const [formData, setFormData] = useState<CreateInventoryItemRequest>({
     nome: '',
-    categoria: '',
     quantidade: 0,
-    preco: 0,
-    estoqueMinimo: 0,
-    descricao: ''
+    descricao: '',
+    localizacao: ''
   });
 
   useEffect(() => {
@@ -42,12 +39,9 @@ const Inventory: React.FC = () => {
     }
   };
 
-  const categories = [...new Set(products.map(p => p.categoria))];
-
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || product.categoria === categoryFilter;
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -71,11 +65,9 @@ const Inventory: React.FC = () => {
   const resetForm = (): void => {
     setFormData({
       nome: '',
-      categoria: '',
       quantidade: 0,
-      preco: 0,
-      estoqueMinimo: 0,
-      descricao: ''
+      descricao: '',
+      localizacao: ''
     });
     setEditingProduct(null);
     setShowModal(false);
@@ -85,11 +77,9 @@ const Inventory: React.FC = () => {
   const handleEdit = (product: InventoryItem): void => {
     setFormData({
       nome: product.nome,
-      categoria: product.categoria,
       quantidade: product.quantidade,
-      preco: product.preco,
-      estoqueMinimo: product.estoqueMinimo,
-      descricao: product.descricao || ''
+      descricao: product.descricao || '',
+      localizacao: product.localizacao || ''
     });
     setEditingProduct(product);
     setShowModal(true);
@@ -106,9 +96,9 @@ const Inventory: React.FC = () => {
     }
   };
 
-  const getStockStatus = (quantity: number, minStock: number): { text: string; class: string } => {
+  const getStockStatus = (quantity: number): { text: string; class: string } => {
     if (quantity === 0) return { text: 'Sem estoque', class: 'danger' };
-    if (quantity <= minStock) return { text: 'Estoque baixo', class: 'warning' };
+    if (quantity <= 5) return { text: 'Estoque baixo', class: 'warning' };
     return { text: 'Em estoque', class: 'success' };
   };
 
@@ -124,7 +114,15 @@ const Inventory: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Gerenciar Estoque</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gerenciar Estoque</h2>
+        <button 
+          className="btn btn-secondary"
+          onClick={() => window.history.back()}
+        >
+          ← Voltar ao Menu
+        </button>
+      </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
 
@@ -137,17 +135,6 @@ const Inventory: React.FC = () => {
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
-
-        <select
-          className="form-select"
-          value={categoryFilter}
-          onChange={e => setCategoryFilter(e.target.value)}
-        >
-          <option value="">Todas as categorias</option>
-          {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
 
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           Novo Produto
@@ -162,9 +149,8 @@ const Inventory: React.FC = () => {
           <thead className="table-light">
             <tr>
               <th>Nome</th>
-              <th>Categoria</th>
+              <th>Localização</th>
               <th>Quantidade</th>
-              <th>Preço</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
@@ -172,13 +158,12 @@ const Inventory: React.FC = () => {
           <tbody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map(product => {
-                const stockStatus = getStockStatus(product.quantidade, product.estoqueMinimo);
+                const stockStatus = getStockStatus(product.quantidade);
                 return (
                   <tr key={product.id}>
                     <td>{product.nome}</td>
-                    <td>{product.categoria}</td>
+                    <td>{product.localizacao || 'Não informado'}</td>
                     <td>{product.quantidade}</td>
-                    <td>R$ {product.preco.toFixed(2)}</td>
                     <td>
                       <span className={`badge bg-${stockStatus.class}`}>
                         {stockStatus.text}
@@ -203,7 +188,7 @@ const Inventory: React.FC = () => {
               })
             ) : (
               <tr>
-                <td colSpan={6} className="text-center">Nenhum produto encontrado</td>
+                <td colSpan={5} className="text-center">Nenhum produto encontrado</td>
               </tr>
             )}
           </tbody>
@@ -238,13 +223,13 @@ const Inventory: React.FC = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Categoria</label>
+                    <label className="form-label">Localização</label>
                     <input 
                       type="text" 
                       className="form-control" 
-                      value={formData.categoria}
-                      onChange={e => handleInputChange('categoria', e.target.value)}
-                      required
+                      value={formData.localizacao}
+                      onChange={e => handleInputChange('localizacao', e.target.value)}
+                      placeholder="Ex: Estoque Principal, Prateleira A1..."
                     />
                   </div>
                   <div className="mb-3">
@@ -254,27 +239,6 @@ const Inventory: React.FC = () => {
                       className="form-control" 
                       value={formData.quantidade}
                       onChange={e => handleInputChange('quantidade', Number(e.target.value))}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Preço</label>
-                    <input 
-                      type="number" 
-                      className="form-control" 
-                      step="0.01"
-                      value={formData.preco}
-                      onChange={e => handleInputChange('preco', Number(e.target.value))}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Estoque Mínimo</label>
-                    <input 
-                      type="number" 
-                      className="form-control" 
-                      value={formData.estoqueMinimo}
-                      onChange={e => handleInputChange('estoqueMinimo', Number(e.target.value))}
                       required
                     />
                   </div>
