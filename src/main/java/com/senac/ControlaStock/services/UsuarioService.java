@@ -29,8 +29,6 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
-
-
     public UsuarioResponseDto buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com ID " + id + " não encontrado."));
@@ -74,6 +72,41 @@ public class UsuarioService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com ID " + id + " não encontrado para remoção.");
         }
         usuarioRepository.deleteById(id);
+    }
+
+    // 🔹 Busca perfil do usuário logado
+    public UsuarioResponseDto buscarPorEmail(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com email " + email + " não encontrado."));
+        return toResponseDto(usuario);
+    }
+
+    // 🔹 Atualiza perfil do usuário logado
+    public UsuarioResponseDto atualizarPerfilPorEmail(String email, UsuarioRequestDto requestDto) {
+        Usuario usuarioExistente = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com email " + email + " não encontrado."));
+
+        if (requestDto.nome() != null && !requestDto.nome().trim().isEmpty()) {
+            usuarioExistente.setNome(requestDto.nome());
+        }
+
+        if (requestDto.email() != null && !requestDto.email().trim().isEmpty()) {
+            if (!requestDto.email().equals(email) && usuarioRepository.findByEmail(requestDto.email()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O e-mail informado já está em uso por outro usuário.");
+            }
+            usuarioExistente.setEmail(requestDto.email());
+        }
+
+        if (requestDto.cpf() != null && !requestDto.cpf().trim().isEmpty()) {
+            usuarioExistente.setCpf(requestDto.cpf());
+        }
+
+        if (requestDto.senha() != null && !requestDto.senha().trim().isEmpty()) {
+            usuarioExistente.setSenha(passwordEncoder.encode(requestDto.senha()));
+        }
+
+        Usuario usuarioAtualizado = usuarioRepository.save(usuarioExistente);
+        return toResponseDto(usuarioAtualizado);
     }
 
     private UsuarioResponseDto toResponseDto(Usuario entity) {

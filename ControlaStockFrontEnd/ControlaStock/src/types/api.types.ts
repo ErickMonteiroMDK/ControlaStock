@@ -25,6 +25,7 @@ export interface User {
   id: number;
   email: string;
   nome?: string;
+  cpf?: string;
   senha?: string;
   criadoEm?: string;
   atualizadoEm?: string;
@@ -34,12 +35,14 @@ export interface CreateUserRequest {
   email: string;
   senha: string;
   nome?: string;
+  cpf?: string;
 }
 
 export interface UpdateUserRequest {
-  email: string;
+  email?: string;
   senha?: string;
   nome?: string;
+  cpf?: string;
 }
 
 export interface ApiError {
@@ -62,6 +65,7 @@ export interface RegisterRequest {
   email: string;
   senha: string;
   nome?: string;
+  cpf?: string;
 }
 
 export interface LoginResponse {

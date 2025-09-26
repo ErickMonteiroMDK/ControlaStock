@@ -4,6 +4,7 @@ import Inventory from '../pages/Inventory';
 import Login from '../pages/Login';
 import Menu from '../pages/Menu';
 import Register from '../pages/Register';
+import Profile from '../pages/Profile'; // Importe o componente Profile
 import { ApiService } from '../services/api';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -37,14 +38,20 @@ export function AppRoutes() {
     }
   };
 
+  const handleLogout = (): void => {
+    ApiService.logout();
+    window.location.href = '/login';
+  };
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/registrar" element={<Register onRegister={handleRegister} />} />
         <Route path="/" element={<RootRedirect />} />
-        <Route path="/menu" element={<PrivateRoute><Menu /></PrivateRoute>} />
+        <Route path="/menu" element={<PrivateRoute><Menu onLogout={handleLogout} /></PrivateRoute>} />
         <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );

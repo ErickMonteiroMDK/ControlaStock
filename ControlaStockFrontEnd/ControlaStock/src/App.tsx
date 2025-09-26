@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// import Navbar from './components/Navbar'; // REMOVIDO - estava causando duplicação
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Menu from './pages/Menu';
 import Inventory from './pages/Inventory';
+import Profile from './pages/Profile'; // Página de perfil
 import { ApiService } from './services/api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -16,19 +16,24 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initializeApp = async (): Promise<void> => {
-      // Testar conexão com o servidor
-      const isServerOnline = await ApiService.testConnection();
-      setServerOnline(isServerOnline);
-      
-      if (!isServerOnline) {
-        console.error('Servidor não está respondendo');
-      }
+      try {
+        // Testar conexão com o servidor
+        const isServerOnline = await ApiService.testConnection();
+        setServerOnline(isServerOnline);
 
-      // Verificar autenticação
-      const isAuthenticated = ApiService.isLoggedIn();
-      
-      setIsLoggedIn(isAuthenticated);
-      setLoading(false);
+        if (!isServerOnline) {
+          console.error('Servidor não está respondendo');
+        }
+
+        // Verificar autenticação
+        const isAuthenticated = ApiService.isLoggedIn();
+        setIsLoggedIn(isAuthenticated);
+      } catch (error) {
+        console.error('Erro ao inicializar a aplicação:', error);
+        setServerOnline(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
     initializeApp();
@@ -45,7 +50,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleRegister = async (nome: string, cpf: string, email: string, password: string): Promise<boolean> => {
+  const handleRegister = async (
+    nome: string,
+    cpf: string,
+    email: string,
+    password: string
+  ): Promise<boolean> => {
     try {
       await ApiService.register(nome, cpf, email, password);
       return true;
@@ -55,7 +65,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Adicionar função de logout que atualiza o estado
   const handleLogout = (): void => {
     ApiService.logout();
     setIsLoggedIn(false);
@@ -80,7 +89,7 @@ const App: React.FC = () => {
         <div className="alert alert-danger text-center">
           <h4>Servidor Offline</h4>
           <p>Não foi possível conectar ao servidor. Verifique se o backend está rodando.</p>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => window.location.reload()}
           >
@@ -94,14 +103,13 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="App">
-        {/* NAVBAR REMOVIDA - cada página gerencia sua própria navbar */}
-        
         <Routes>
           <Route path="/" element={isLoggedIn ? <Navigate to="/menu" /> : <Navigate to="/login" />} />
           <Route path="/login" element={isLoggedIn ? <Navigate to="/menu" /> : <Login onLogin={handleLogin} />} />
           <Route path="/registrar" element={isLoggedIn ? <Navigate to="/menu" /> : <Register onRegister={handleRegister} />} />
           <Route path="/menu" element={isLoggedIn ? <Menu onLogout={handleLogout} /> : <Navigate to="/login" />} />
           <Route path="/inventory" element={isLoggedIn ? <Inventory /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={isLoggedIn ? <Profile /> : <Navigate to="/login" />} />
         </Routes>
       </div>
     </Router>

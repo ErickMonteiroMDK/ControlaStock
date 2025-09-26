@@ -4,6 +4,7 @@ import type {
   UpdateInventoryItemRequest,
   User,
   CreateUserRequest,
+  UpdateUserRequest,
   ApiError
 } from '../types/api.types';
 
@@ -105,7 +106,6 @@ export class ApiService {
         senha: password
       };
 
-      // CORREÇÃO: mudança de /auth/register para /auth/registrar
       const response = await fetch(`${API_BASE_URL}/auth/registrar`, {
         method: 'POST',
         headers: {
@@ -160,6 +160,41 @@ export class ApiService {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(userData)
+    });
+    return this.handleResponse<User>(response);
+  }
+
+  // ================== PERFIL DO USUÁRIO ==================
+  static async getCurrentUserProfile(): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/api/usuarios/perfil`, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
+    });
+    return this.handleResponse<User>(response);
+  }
+
+  static async updateUserProfile(userData: UpdateUserRequest): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/api/usuarios/perfil`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(userData)
+    });
+    return this.handleResponse<User>(response);
+  }
+
+  static async updateUser(id: number, userData: UpdateUserRequest): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/api/usuarios/${id}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(userData)
+    });
+    return this.handleResponse<User>(response);
+  }
+
+  static async getUserById(id: number): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/api/usuarios/${id}`, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
     });
     return this.handleResponse<User>(response);
   }

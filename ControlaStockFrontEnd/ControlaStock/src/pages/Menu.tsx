@@ -67,7 +67,11 @@ const Menu: React.FC<MenuProps> = ({ onLogout }) => {
                 {user?.email}
               </a>
               <ul className="dropdown-menu">
-                <li><a className="dropdown-item" href="#"><i className="bi bi-person me-2"></i>Meu perfil</a></li>
+                <li>
+                  <Link className="dropdown-item" to="/profile">
+                    <i className="bi bi-person me-2"></i>Meu perfil
+                  </Link>
+                </li>
                 <li><hr className="dropdown-divider" /></li>
                 <li>
                   <button className="dropdown-item text-danger" onClick={handleLogout}>
