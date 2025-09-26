@@ -126,7 +126,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <div className="auth-switch">
                   <p className="mb-0 text-muted">
                     Não tem uma conta?{' '}
-                    <Link to="/register" className="fw-bold">
+                    <Link to="/registrar" className="fw-bold">
                       Criar conta agora
                     </Link>
                   </p>
