@@ -11,21 +11,22 @@ export interface CreateInventoryItemRequest {
   nome: string;
   descricao?: string;
   quantidade: number;
-  localizacao?: string; // Opcional no frontend, será preenchido automaticamente no backend se vazio
+  localizacao: string;
 }
 
 export interface UpdateInventoryItemRequest {
-  nome: string;
+  nome?: string;
   descricao?: string;
-  quantidade: number;
+  quantidade?: number;
   localizacao?: string;
 }
 
 export interface User {
   id: number;
   email: string;
-  nome?: string;
-  cpf?: string;
+  nome: string;
+  cpf: string;
+  role: string;
   senha?: string;
   criadoEm?: string;
   atualizadoEm?: string;
@@ -34,8 +35,9 @@ export interface User {
 export interface CreateUserRequest {
   email: string;
   senha: string;
-  nome?: string;
-  cpf?: string;
+  nome: string;
+  cpf: string;
+  role: string;
 }
 
 export interface UpdateUserRequest {
@@ -43,11 +45,35 @@ export interface UpdateUserRequest {
   senha?: string;
   nome?: string;
   cpf?: string;
+  role?: string;
 }
 
 export interface ApiError {
   message: string;
   status?: number;
+}
+
+export interface LoginResponse {
+  token: string;
+  user?: User;
+}
+
+export interface RegisterResponse {
+  id: number;
+  email: string;
+  nome: string;
+  cpf: string;
+  role: string;
+  createdAt?: string;
+}
+
+// Interface para a estrutura de erro padrão do backend
+export interface BackendError {
+  message?: string;
+  error?: string;
+  status?: number;
+  path?: string;
+  timestamp?: string;
 }
 
 // Interface para operações de quantidade
@@ -64,17 +90,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   senha: string;
-  nome?: string;
-  cpf?: string;
-}
-
-export interface LoginResponse {
-  token: string;
-}
-
-export interface RegisterResponse {
-  id: number;
-  email: string;
-  nome?: string;
-  createdAt?: string;
+  nome: string;
+  cpf: string;
+  role: string;
 }
