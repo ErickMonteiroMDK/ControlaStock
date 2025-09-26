@@ -180,7 +180,7 @@ const Menu: React.FC<MenuProps> = ({ onLogout }) => {
               </h6>
             </div>
             <div className="col-md-6 text-md-end">
-              <small>© 2024 Sistema de Gestão de Estoque. Todos os direitos reservados.</small>
+              <small>© 2025 Sistema de Gestão de Estoque. Todos os direitos reservados.</small>
             </div>
           </div>
         </div>

@@ -138,7 +138,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             {/* Footer */}
             <div className="auth-footer mt-4">
               <p className="mb-0">
-                © 2024 ControlaStock - Sistema de Gestão de Estoque
+                © 2025 ControlaStock - Sistema de Gestão de Estoque
               </p>
             </div>
 

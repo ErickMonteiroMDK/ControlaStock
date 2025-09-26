@@ -82,42 +82,44 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
     <div className="auth-main-bg d-flex align-items-center justify-content-center min-vh-100 p-3">
       <div className="container">
         <div className="row justify-content-center">
-          <div className="col-12 col-md-8 col-lg-6 col-xl-5">
+          <div className="col-12 col-md-8 col-lg-6 col-xl-4">
             
             <div className="auth-main-card">
               
-              <div className="auth-header">
+              {/* Header mais compacto */}
+              <div className="auth-header pb-3">
                 <span className="auth-icon">👤</span>
-                <h1 className="auth-title">Criar Conta</h1>
-                <p className="auth-subtitle">Junte-se ao ControlaStock</p>
+                <h1 className="auth-title mb-1">Criar Conta</h1>
+                <p className="auth-subtitle mb-0">Junte-se ao ControlaStock</p>
               </div>
 
               <div className="auth-body">
                 
                 {error && (
-                  <div className="alert alert-danger alert-modern d-flex align-items-center mb-4">
-                    <i className="bi bi-exclamation-triangle me-3 fs-5"></i>
-                    <span>{error}</span>
+                  <div className="alert alert-danger alert-modern d-flex align-items-center mb-3">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    <span className="small">{error}</span>
                   </div>
                 )}
 
                 {success && (
-                  <div className="alert alert-success alert-modern d-flex align-items-center mb-4">
-                    <i className="bi bi-check-circle me-3 fs-5"></i>
-                    <span>{success}</span>
+                  <div className="alert alert-success alert-modern d-flex align-items-center mb-3">
+                    <i className="bi bi-check-circle me-2"></i>
+                    <span className="small">{success}</span>
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
                   
-                  <div className="form-group">
-                    <label htmlFor="nome" className="form-label">
-                      <i className="bi bi-person-fill"></i>
+                  {/* Campos com espaçamento reduzido */}
+                  <div className="form-group mb-3">
+                    <label htmlFor="nome" className="form-label mb-1">
+                      <i className="bi bi-person-fill me-1"></i>
                       Nome Completo
                     </label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control form-control-sm"
                       id="nome"
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
@@ -126,14 +128,14 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="cpf" className="form-label">
-                      <i className="bi bi-card-checklist"></i>
+                  <div className="form-group mb-3">
+                    <label htmlFor="cpf" className="form-label mb-1">
+                      <i className="bi bi-card-checklist me-1"></i>
                       CPF
                     </label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control form-control-sm"
                       id="cpf"
                       value={cpf}
                       onChange={handleCpfChange}
@@ -141,17 +143,16 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                       maxLength={14}
                       required
                     />
-                    <small className="text-muted">Formato: 000.000.000-00</small>
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="email" className="form-label">
-                      <i className="bi bi-envelope-fill"></i>
+                  <div className="form-group mb-3">
+                    <label htmlFor="email" className="form-label mb-1">
+                      <i className="bi bi-envelope-fill me-1"></i>
                       Email
                     </label>
                     <input
                       type="email"
-                      className="form-control"
+                      className="form-control form-control-sm"
                       id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -160,59 +161,65 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="password" className="form-label">
-                      <i className="bi bi-lock-fill"></i>
-                      Senha
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Mínimo 6 caracteres"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="confirmPassword" className="form-label">
-                      <i className="bi bi-lock-fill"></i>
-                      Confirmar Senha
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="confirmPassword"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Digite novamente sua senha"
-                      required
-                    />
+                  {/* Senhas em linha para economizar espaço */}
+                  <div className="row">
+                    <div className="col-6">
+                      <div className="form-group mb-3">
+                        <label htmlFor="password" className="form-label mb-1">
+                          <i className="bi bi-lock-fill me-1"></i>
+                          Senha
+                        </label>
+                        <input
+                          type="password"
+                          className="form-control form-control-sm"
+                          id="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Min. 6 chars"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="form-group mb-3">
+                        <label htmlFor="confirmPassword" className="form-label mb-1">
+                          <i className="bi bi-lock-fill me-1"></i>
+                          Confirmar
+                        </label>
+                        <input
+                          type="password"
+                          className="form-control form-control-sm"
+                          id="confirmPassword"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Repita a senha"
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="btn btn-primary-modern w-100 py-3"
+                    className="btn btn-primary-modern w-100 py-2 mb-3"
                     disabled={loading}
                   >
                     {loading ? (
                       <>
                         <span className="spinner-modern"></span>
-                        CRIANDO CONTA...
+                        CRIANDO...
                       </>
                     ) : (
                       <>
                         <i className="bi bi-person-plus me-2"></i>
-                        CRIAR MINHA CONTA
+                        CRIAR CONTA
                       </>
                     )}
                   </button>
                 </form>
 
-                <div className="auth-switch">
-                  <p className="mb-0 text-muted">
+                <div className="auth-switch text-center">
+                  <p className="mb-0 text-muted small">
                     Já tem uma conta?{' '}
                     <Link to="/login" className="fw-bold">
                       Fazer login
@@ -223,9 +230,9 @@ const Register: React.FC<RegisterProps> = ({ onRegister }) => {
               </div>
             </div>
 
-            <div className="auth-footer mt-4">
-              <p className="mb-0">
-                © 2024 ControlaStock - Sistema de Gestão de Estoque
+            <div className="auth-footer mt-3">
+              <p className="mb-0 small text-center">
+                © 2025 ControlaStock
               </p>
             </div>
 
