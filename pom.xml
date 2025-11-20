@@ -8,7 +8,11 @@
 		<version>3.5.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+<<<<<<< HEAD
 	<groupId>com.controlastock</groupId>
+=======
+	<groupId>com.senac</groupId>
+>>>>>>> 715e48ee88a8ad6f55ea085b75ef312431ed2c37
 	<artifactId>ControlaStock</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ControlaStock</name>

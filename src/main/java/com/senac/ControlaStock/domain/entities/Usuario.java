@@ -26,7 +26,11 @@ public class Usuario implements UserDetails {
     private String nome;
 
     @Column(nullable = false, unique = true)
+<<<<<<< HEAD
     private String cnpj;
+=======
+    private String cpf;
+>>>>>>> 715e48ee88a8ad6f55ea085b75ef312431ed2c37
 
     @Column(nullable = false, unique = true)
     private String email;
