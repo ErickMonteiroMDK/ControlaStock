@@ -43,6 +43,8 @@ public class UsuarioService {
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome(requestDto.nome());
         novoUsuario.setCpf(requestDto.cpf());
+        novoUsuario.setCnpj(requestDto.cnpj());
+        novoUsuario.setCep(requestDto.cep());
         novoUsuario.setEmail(requestDto.email());
         novoUsuario.setSenha(passwordEncoder.encode(requestDto.senha()));
         novoUsuario.setRole("ROLE_USER");
@@ -114,6 +116,8 @@ public class UsuarioService {
                 entity.getId(),
                 entity.getNome(),
                 entity.getCpf(),
+                entity.getCnpj(),
+                entity.getCep(),
                 entity.getEmail(),
                 entity.getRole()
         );
