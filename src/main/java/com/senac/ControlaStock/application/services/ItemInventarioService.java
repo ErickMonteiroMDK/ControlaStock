@@ -1,8 +1,9 @@
-package com.senac.ControlaStock.application.dto.services;
+package com.senac.ControlaStock.application.services;
 
 import com.senac.ControlaStock.application.dto.itemInventario.ItemInventarioRequestDto;
 import com.senac.ControlaStock.application.dto.itemInventario.ItemInventarioResponseDto;
 import com.senac.ControlaStock.domain.entities.ItemInventario;
+import com.senac.ControlaStock.domain.entities.Usuario;
 import com.senac.ControlaStock.domain.repository.ItemInventarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,34 +19,45 @@ public class ItemInventarioService {
     @Autowired
     private ItemInventarioRepository itemInventarioRepository;
 
-    public List<ItemInventarioResponseDto> listarTodos() {
-        return itemInventarioRepository.findAll()
+    public List<ItemInventarioResponseDto> listarTodos(Usuario usuarioLogado) {
+        return itemInventarioRepository.findByUsuario(usuarioLogado)
                 .stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }
 
-    public ItemInventarioResponseDto buscarPorId(Long id) {
+    public ItemInventarioResponseDto buscarPorId(Long id, Usuario usuarioLogado) {
         ItemInventario item = itemInventarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
+
+        // Verificar se o item pertence ao usuário logado
+        if (!item.getUsuario().getId().equals(usuarioLogado.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para acessar este item.");
+        }
+
         return toResponseDto(item);
     }
 
-    public ItemInventarioResponseDto criarItem(ItemInventarioRequestDto requestDto) {
+    public ItemInventarioResponseDto criarItem(ItemInventarioRequestDto requestDto, Usuario usuarioLogado) {
         ItemInventario novoItem = toEntity(requestDto);
+        novoItem.setUsuario(usuarioLogado);
+
         ItemInventario itemSalvo = itemInventarioRepository.save(novoItem);
         return toResponseDto(itemSalvo);
     }
 
-    public ItemInventarioResponseDto atualizarItem(Long id, ItemInventarioRequestDto requestDto) {
+    public ItemInventarioResponseDto atualizarItem(Long id, ItemInventarioRequestDto requestDto, Usuario usuarioLogado) {
         ItemInventario itemExistente = itemInventarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado para atualização."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
+
+        if (!itemExistente.getUsuario().getId().equals(usuarioLogado.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para atualizar este item.");
+        }
 
         itemExistente.setNome(requestDto.nome());
         itemExistente.setDescricao(requestDto.descricao());
         itemExistente.setQuantidade(requestDto.quantidade());
 
-        // Aplicar a mesma lógica de valor padrão para atualização
         String localizacao = requestDto.localizacao();
         if (localizacao == null || localizacao.trim().isEmpty()) {
             localizacao = "Estoque Principal";
@@ -56,25 +68,37 @@ public class ItemInventarioService {
         return toResponseDto(itemAtualizado);
     }
 
-    public void removerItem(Long id) {
-        if (!itemInventarioRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado para remoção.");
+    public void removerItem(Long id, Usuario usuarioLogado) {
+        ItemInventario item = itemInventarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
+
+        if (!item.getUsuario().getId().equals(usuarioLogado.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para remover este item.");
         }
+
         itemInventarioRepository.deleteById(id);
     }
 
-    public ItemInventarioResponseDto adicionarQuantidade(Long id, Integer quantidade) {
+    public ItemInventarioResponseDto adicionarQuantidade(Long id, Integer quantidade, Usuario usuarioLogado) {
         ItemInventario item = itemInventarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
+
+        if (!item.getUsuario().getId().equals(usuarioLogado.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para modificar este item.");
+        }
 
         item.setQuantidade(item.getQuantidade() + quantidade);
         ItemInventario itemAtualizado = itemInventarioRepository.save(item);
         return toResponseDto(itemAtualizado);
     }
 
-    public ItemInventarioResponseDto removerQuantidade(Long id, Integer quantidade) {
+    public ItemInventarioResponseDto removerQuantidade(Long id, Integer quantidade, Usuario usuarioLogado) {
         ItemInventario item = itemInventarioRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item com ID " + id + " não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
+
+        if (!item.getUsuario().getId().equals(usuarioLogado.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para modificar este item.");
+        }
 
         if (item.getQuantidade() < quantidade) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantidade a ser removida é maior que o estoque atual.");
@@ -91,10 +115,9 @@ public class ItemInventarioService {
         entity.setDescricao(dto.descricao());
         entity.setQuantidade(dto.quantidade());
 
-        // Define valor padrão se localização for nula ou vazia
         String localizacao = dto.localizacao();
         if (localizacao == null || localizacao.trim().isEmpty()) {
-            localizacao = "Estoque Principal"; // valor padrão
+            localizacao = "Estoque Principal";
         }
         entity.setLocalizacao(localizacao);
 

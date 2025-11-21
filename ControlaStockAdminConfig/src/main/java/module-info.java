@@ -7,6 +7,14 @@ module com.controlastock.controlastockadminconfig {
     requires org.hibernate.orm.core;
     requires static lombok;
     requires spring.security.core;
+    requires jakarta.validation;
+    requires spring.beans;
+    requires spring.context;
+    requires spring.web;
+    requires spring.tx;
+    requires com.auth0.jwt;
+    requires io.swagger.v3.oas.annotations;
+    requires spring.data.jpa;
 
 
     opens com.controlastock.controlastockadminconfig to javafx.fxml;

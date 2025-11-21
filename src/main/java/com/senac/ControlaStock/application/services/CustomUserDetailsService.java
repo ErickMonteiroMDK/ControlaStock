@@ -1,4 +1,4 @@
-package com.senac.ControlaStock.application.dto.services;
+package com.senac.ControlaStock.application.services;
 
 import com.senac.ControlaStock.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;

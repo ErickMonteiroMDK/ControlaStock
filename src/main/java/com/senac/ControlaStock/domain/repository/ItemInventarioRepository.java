@@ -1,6 +1,7 @@
 package com.senac.ControlaStock.domain.repository;
 
 import com.senac.ControlaStock.domain.entities.ItemInventario;
+import com.senac.ControlaStock.domain.entities.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +13,6 @@ public interface ItemInventarioRepository extends JpaRepository<ItemInventario, 
     List<ItemInventario> findByNomeContainingIgnoreCase(String nome);
 
     List<ItemInventario> findByLocalizacaoContainingIgnoreCase(String localizacao);
+
+    List<ItemInventario> findByUsuario(Usuario usuario);
 }

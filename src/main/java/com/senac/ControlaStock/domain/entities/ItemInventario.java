@@ -27,4 +27,8 @@ public class ItemInventario {
 
     @Column(nullable = false)
     private String localizacao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 }
