@@ -1,4 +1,4 @@
-package com.senac.ControlaStock.application.dto.services;
+package com.senac.ControlaStock.application.services;
 
 import com.senac.ControlaStock.application.dto.usuario.UsuarioRequestDto;
 import com.senac.ControlaStock.application.dto.usuario.UsuarioResponseDto;
@@ -74,14 +74,14 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    // 🔹 Busca perfil do usuário logado
+    //  Busca perfil do usuário logado
     public UsuarioResponseDto buscarPorEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com email " + email + " não encontrado."));
         return toResponseDto(usuario);
     }
 
-    // 🔹 Atualiza perfil do usuário logado
+    //  Atualiza perfil do usuário logado
     public UsuarioResponseDto atualizarPerfilPorEmail(String email, UsuarioRequestDto requestDto) {
         Usuario usuarioExistente = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com email " + email + " não encontrado."));

@@ -10,9 +10,9 @@ import java.io.IOException;
 public class AdminDesktopApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(AdminDesktopApplication.class.getResource("menu-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        stage.setTitle("Portal de configuração");
+        FXMLLoader fxmlLoader = new FXMLLoader(AdminDesktopApplication.class.getResource("cadastro-admin-view.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 600, 500);
+        stage.setTitle("ControlaStock - Criar Usuário Admin");
         stage.setScene(scene);
         stage.show();
     }

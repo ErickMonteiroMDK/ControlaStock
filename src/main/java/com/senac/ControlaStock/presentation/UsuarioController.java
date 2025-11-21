@@ -2,7 +2,7 @@ package com.senac.ControlaStock.presentation;
 
 import com.senac.ControlaStock.application.dto.usuario.UsuarioRequestDto;
 import com.senac.ControlaStock.application.dto.usuario.UsuarioResponseDto;
-import com.senac.ControlaStock.application.dto.services.UsuarioService;
+import com.senac.ControlaStock.application.services.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

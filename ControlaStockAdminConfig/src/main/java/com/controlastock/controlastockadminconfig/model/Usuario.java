@@ -13,12 +13,10 @@ public class Usuario {
     private Long id;
 
     private String nome;
-
     private String cnpj;
-
     private String email;
-
     private String senha;
+    private String cep;
 
     public Long getId() {
         return id;
@@ -58,5 +56,13 @@ public class Usuario {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
     }
 }

@@ -1,7 +1,7 @@
 package com.senac.ControlaStock.infra.config;
 
 import com.senac.ControlaStock.domain.entities.Usuario;
-import com.senac.ControlaStock.application.dto.services.TokenService;
+import com.senac.ControlaStock.application.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

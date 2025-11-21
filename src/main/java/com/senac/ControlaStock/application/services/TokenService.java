@@ -1,4 +1,4 @@
-package com.senac.ControlaStock.application.dto.services;
+package com.senac.ControlaStock.application.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
