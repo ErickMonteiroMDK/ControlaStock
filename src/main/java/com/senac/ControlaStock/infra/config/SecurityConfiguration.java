@@ -36,6 +36,7 @@ public class SecurityConfiguration {
                         // Swagger liberado
                         .requestMatchers(
                                 "/v3/api-docs/**",
+                                "/api/cep/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
