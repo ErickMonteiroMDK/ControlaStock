@@ -42,7 +42,7 @@ public class UsuarioService {
 
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome(requestDto.nome());
-        novoUsuario.setCpf(requestDto.cpf());
+        novoUsuario.setCep(requestDto.cep());
         novoUsuario.setCnpj(requestDto.cnpj());
         novoUsuario.setCep(requestDto.cep());
         novoUsuario.setEmail(requestDto.email());
@@ -58,7 +58,7 @@ public class UsuarioService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com ID " + id + " não encontrado para atualização."));
 
         usuarioExistente.setNome(requestDto.nome());
-        usuarioExistente.setCpf(requestDto.cpf());
+        usuarioExistente.setCep(requestDto.cep());
         usuarioExistente.setEmail(requestDto.email());
 
         if (requestDto.senha() != null && !requestDto.senha().isEmpty()) {
@@ -99,8 +99,8 @@ public class UsuarioService {
             usuarioExistente.setEmail(requestDto.email());
         }
 
-        if (requestDto.cpf() != null && !requestDto.cpf().trim().isEmpty()) {
-            usuarioExistente.setCpf(requestDto.cpf());
+        if (requestDto.cep() != null && !requestDto.cep().trim().isEmpty()) {
+            usuarioExistente.setCep(requestDto.cep());
         }
 
         if (requestDto.senha() != null && !requestDto.senha().trim().isEmpty()) {
@@ -115,9 +115,8 @@ public class UsuarioService {
         return new UsuarioResponseDto(
                 entity.getId(),
                 entity.getNome(),
-                entity.getCpf(),
-                entity.getCnpj(),
                 entity.getCep(),
+                entity.getCnpj(),
                 entity.getEmail(),
                 entity.getRole()
         );

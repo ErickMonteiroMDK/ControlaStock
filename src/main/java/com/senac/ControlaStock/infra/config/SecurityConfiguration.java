@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -22,53 +21,42 @@ public class SecurityConfiguration {
     @Autowired
     private JwtFilter jwtFilter;
 
-    @Autowired
-    private CorsConfigurationSource corsConfigurationSource;
-
     @Bean
-    // Esta é a configuração padrão - COM segurança
-    public SecurityFilterChain secureFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // Usar CORS configurado
-                .csrf(csrf -> csrf.disable()) // Desabilitar CSRF completamente
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Rotas Públicas - ORDEM IMPORTA!
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permitir preflight OPTIONS
-                        .requestMatchers("/auth/**").permitAll() // Permite login E registro
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll() // Backup se ainda usar createUser
+                .authorizeHttpRequests(authorize -> authorize
+
+                        //  Rotas públicas (não exigem token)
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/registrar").permitAll()
+                        .requestMatchers("/health").permitAll()
+
+                        // Swagger liberado
                         .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**",
-                                "/",
-                                "/health"
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
-                        // Todas as outras rotas precisam de autenticação
+
+                        //  Exemplo de rota protegida por role
+                        .requestMatchers(HttpMethod.POST, "/product").hasRole("ADMIN")
+
+                        //  Todas as outras rotas exigem autenticação
                         .anyRequest().authenticated()
                 )
+
+                // Filtro do JWT antes do filtro padrão
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .build();
     }
 
-    // CONFIGURAÇÃO SEM SEGURANÇA (PARA DEMONSTRAÇÃO)
-    // Descomente o @Bean abaixo e comente o @Primary acima para DESABILITAR a segurança
-    // @Bean
-    // public SecurityFilterChain openFilterChain(HttpSecurity http) throws Exception {
-    //     System.out.println(" ATENÇÃO: SEGURANÇA DESABILITADA - TODOS OS ENDPOINTS ESTÃO ABERTOS!");
-    //     return http
-    //             .cors(cors -> cors.configurationSource(corsConfigurationSource))
-    //             .csrf(csrf -> csrf.disable())
-    //             .authorizeHttpRequests(auth -> auth
-    //                     .anyRequest().permitAll()     //             )
-    //             .build();
-    // }
-
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-            throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration authenticationConfiguration
+    ) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 

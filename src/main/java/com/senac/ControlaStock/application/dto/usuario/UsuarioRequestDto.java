@@ -8,8 +8,6 @@ public record UsuarioRequestDto(
         @NotBlank(message = "Nome é obrigatório")
         String nome,
 
-        String cpf,
-
         @NotBlank(message = "CNPJ é obrigatório")
         @Size(min = 14, max = 14, message = "CNPJ deve ter 14 dígitos")
         String cnpj,
