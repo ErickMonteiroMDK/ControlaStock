@@ -2,6 +2,7 @@ package com.senac.ControlaStock.application.services;
 
 import com.senac.ControlaStock.application.dto.usuario.UsuarioRequestDto;
 import com.senac.ControlaStock.application.dto.usuario.UsuarioResponseDto;
+import com.senac.ControlaStock.application.ports.UsuarioServicePorts;
 import com.senac.ControlaStock.domain.entities.Usuario;
 import com.senac.ControlaStock.domain.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UsuarioService {
+public class UsuarioService implements UsuarioServicePorts {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -22,6 +23,7 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Override
     public List<UsuarioResponseDto> listarTodos() {
         return usuarioRepository.findAll()
                 .stream()
@@ -29,12 +31,14 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public UsuarioResponseDto buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com ID " + id + " não encontrado."));
         return toResponseDto(usuario);
     }
 
+    @Override
     public UsuarioResponseDto criarUsuario(UsuarioRequestDto requestDto) {
         if (usuarioRepository.findByEmail(requestDto.email()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O e-mail informado já está em uso.");
@@ -42,7 +46,6 @@ public class UsuarioService {
 
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome(requestDto.nome());
-        novoUsuario.setCep(requestDto.cep());
         novoUsuario.setCnpj(requestDto.cnpj());
         novoUsuario.setCep(requestDto.cep());
         novoUsuario.setEmail(requestDto.email());
@@ -53,11 +56,13 @@ public class UsuarioService {
         return toResponseDto(usuarioSalvo);
     }
 
+    @Override
     public UsuarioResponseDto atualizarUsuario(Long id, UsuarioRequestDto requestDto) {
         Usuario usuarioExistente = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com ID " + id + " não encontrado para atualização."));
 
         usuarioExistente.setNome(requestDto.nome());
+        usuarioExistente.setCnpj(requestDto.cnpj());
         usuarioExistente.setCep(requestDto.cep());
         usuarioExistente.setEmail(requestDto.email());
 
@@ -69,6 +74,7 @@ public class UsuarioService {
         return toResponseDto(usuarioAtualizado);
     }
 
+    @Override
     public void removerUsuario(Long id) {
         if (!usuarioRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com ID " + id + " não encontrado para remoção.");
@@ -76,14 +82,14 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    //  Busca perfil do usuário logado
+    @Override
     public UsuarioResponseDto buscarPorEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com email " + email + " não encontrado."));
         return toResponseDto(usuario);
     }
 
-    //  Atualiza perfil do usuário logado
+    @Override
     public UsuarioResponseDto atualizarPerfilPorEmail(String email, UsuarioRequestDto requestDto) {
         Usuario usuarioExistente = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário com email " + email + " não encontrado."));
@@ -97,6 +103,10 @@ public class UsuarioService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O e-mail informado já está em uso por outro usuário.");
             }
             usuarioExistente.setEmail(requestDto.email());
+        }
+
+        if (requestDto.cnpj() != null && !requestDto.cnpj().trim().isEmpty()) {
+            usuarioExistente.setCnpj(requestDto.cnpj());
         }
 
         if (requestDto.cep() != null && !requestDto.cep().trim().isEmpty()) {
@@ -115,8 +125,8 @@ public class UsuarioService {
         return new UsuarioResponseDto(
                 entity.getId(),
                 entity.getNome(),
-                entity.getCep(),
                 entity.getCnpj(),
+                entity.getCep(),
                 entity.getEmail(),
                 entity.getRole()
         );

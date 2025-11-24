@@ -2,7 +2,7 @@ package com.senac.ControlaStock.presentation;
 
 import com.senac.ControlaStock.application.dto.itemInventario.ItemInventarioRequestDto;
 import com.senac.ControlaStock.application.dto.itemInventario.ItemInventarioResponseDto;
-import com.senac.ControlaStock.application.services.ItemInventarioService;
+import com.senac.ControlaStock.application.ports.ItemInventarioServicePorts;
 import com.senac.ControlaStock.domain.entities.Usuario;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ItemInventarioController {
 
     @Autowired
-    private ItemInventarioService itemInventarioService;
+    private ItemInventarioServicePorts itemInventarioService;
 
     @GetMapping
     @Operation(summary = "Lista todos os itens do inventário do usuário logado")

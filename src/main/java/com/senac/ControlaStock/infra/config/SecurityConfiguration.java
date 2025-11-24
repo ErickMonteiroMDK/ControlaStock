@@ -40,15 +40,14 @@ public class SecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-
-                        //  Exemplo de rota protegida por role
+                        .requestMatchers("/api/usuarios/perfil").authenticated()
+                        .requestMatchers("/api/inventario/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/product").hasRole("ADMIN")
 
                         //  Todas as outras rotas exigem autenticação
                         .anyRequest().authenticated()
                 )
 
-                // Filtro do JWT antes do filtro padrão
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .build();

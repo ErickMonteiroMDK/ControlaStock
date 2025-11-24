@@ -25,6 +25,7 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private String nome;
 
+    // CNPJ é um campo obrigatório e único, ok.
     @Column(nullable = false, unique = true)
     private String cnpj;
 
@@ -49,6 +50,7 @@ public class Usuario implements UserDetails {
         return this.senha;
     }
 
+    // O nome de usuário para o Spring Security é o Emai
     @Override
     public String getUsername() {
         return this.email;
@@ -72,12 +74,5 @@ public class Usuario implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public void setCep(String cep) {
-    }
-
-    public String getCep() {
-        return "";
     }
 }

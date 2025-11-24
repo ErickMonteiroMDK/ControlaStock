@@ -1,7 +1,9 @@
 package com.senac.ControlaStock.application.services;
 
+import com.senac.ControlaStock.application.ports.ItemInventarioServicePorts;
 import com.senac.ControlaStock.application.dto.itemInventario.ItemInventarioRequestDto;
 import com.senac.ControlaStock.application.dto.itemInventario.ItemInventarioResponseDto;
+import com.senac.ControlaStock.application.ports.ItemInventarioServicePorts;
 import com.senac.ControlaStock.domain.entities.ItemInventario;
 import com.senac.ControlaStock.domain.entities.Usuario;
 import com.senac.ControlaStock.domain.repository.ItemInventarioRepository;
@@ -14,11 +16,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ItemInventarioService {
+public class ItemInventarioService implements ItemInventarioServicePorts {
 
     @Autowired
     private ItemInventarioRepository itemInventarioRepository;
 
+    @Override
     public List<ItemInventarioResponseDto> listarTodos(Usuario usuarioLogado) {
         return itemInventarioRepository.findByUsuario(usuarioLogado)
                 .stream()
@@ -26,11 +29,11 @@ public class ItemInventarioService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public ItemInventarioResponseDto buscarPorId(Long id, Usuario usuarioLogado) {
         ItemInventario item = itemInventarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
 
-        // Verificar se o item pertence ao usuário logado
         if (!item.getUsuario().getId().equals(usuarioLogado.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para acessar este item.");
         }
@@ -38,6 +41,7 @@ public class ItemInventarioService {
         return toResponseDto(item);
     }
 
+    @Override
     public ItemInventarioResponseDto criarItem(ItemInventarioRequestDto requestDto, Usuario usuarioLogado) {
         ItemInventario novoItem = toEntity(requestDto);
         novoItem.setUsuario(usuarioLogado);
@@ -46,6 +50,7 @@ public class ItemInventarioService {
         return toResponseDto(itemSalvo);
     }
 
+    @Override
     public ItemInventarioResponseDto atualizarItem(Long id, ItemInventarioRequestDto requestDto, Usuario usuarioLogado) {
         ItemInventario itemExistente = itemInventarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
@@ -68,6 +73,7 @@ public class ItemInventarioService {
         return toResponseDto(itemAtualizado);
     }
 
+    @Override
     public void removerItem(Long id, Usuario usuarioLogado) {
         ItemInventario item = itemInventarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
@@ -79,6 +85,7 @@ public class ItemInventarioService {
         itemInventarioRepository.deleteById(id);
     }
 
+    @Override
     public ItemInventarioResponseDto adicionarQuantidade(Long id, Integer quantidade, Usuario usuarioLogado) {
         ItemInventario item = itemInventarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));
@@ -92,6 +99,7 @@ public class ItemInventarioService {
         return toResponseDto(itemAtualizado);
     }
 
+    @Override
     public ItemInventarioResponseDto removerQuantidade(Long id, Integer quantidade, Usuario usuarioLogado) {
         ItemInventario item = itemInventarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado."));

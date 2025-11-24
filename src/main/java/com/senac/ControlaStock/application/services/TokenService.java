@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.senac.ControlaStock.application.ports.TokenServicePorts;
 import com.senac.ControlaStock.domain.entities.Token;
 import com.senac.ControlaStock.domain.entities.Usuario;
 import com.senac.ControlaStock.domain.repository.TokenRepository;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Service
-public class TokenService {
+public class TokenService implements TokenServicePorts {
 
     @Value("${spring.secretkey}")
     private String secret;
@@ -34,6 +35,7 @@ public class TokenService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Override
     public String gerarToken(Usuario usuario) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
@@ -47,8 +49,10 @@ public class TokenService {
         return token;
     }
 
-    @Transactional // Adicionar transação para evitar problemas de sessão
-    public Usuario validarToken(String token) {
+
+    @Override
+    @Transactional
+    public String validarToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm)
@@ -56,22 +60,24 @@ public class TokenService {
                     .build();
 
             var payload = verifier.verify(token);
-            String email = payload.getSubject(); // Extrair email do token
+            String email = payload.getSubject();
 
-            // CORREÇÃO: Buscar usuário diretamente pelo email em vez de usar a relação lazy
-            Usuario usuario = usuarioRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-            // Verificar se token existe no banco (opcional - para maior segurança)
+            // Verificação validade do token no banco de dados
             var tokenResult = tokenRepository.findByToken(token).orElse(null);
             if (tokenResult == null) {
-                throw new IllegalArgumentException("Token inválido");
+                return null;
             }
 
-            return usuario;
+            // O Token é válido e existe. Retorna o email.
+            return email;
 
         } catch (JWTVerificationException e) {
-            throw new IllegalArgumentException("Token inválido ou expirado: " + e.getMessage());
+            System.err.println("Erro de validação JWT: " + e.getMessage());
+            return null;
+
+        } catch (Exception e) {
+            System.err.println("Erro inesperado durante a validação do token: " + e.getMessage());
+            return null;
         }
     }
 
@@ -80,6 +86,4 @@ public class TokenService {
         dataAtual = dataAtual.plusMinutes(tempo_expiracao);
         return dataAtual.toInstant(ZoneOffset.of("-03:00"));
     }
-
-
 }
