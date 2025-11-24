@@ -14,6 +14,6 @@ public record ItemInventarioRequestDto(
         @Min(value = 0, message = "Quantidade não pode ser negativa")
         Integer quantidade,
 
-        @NotBlank(message = "Localização é obrigatória")
+        // Localização é opcional - será "Estoque Principal" se vazio
         String localizacao
 ) {}
