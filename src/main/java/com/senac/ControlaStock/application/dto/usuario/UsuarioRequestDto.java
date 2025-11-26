@@ -9,11 +9,11 @@ public record UsuarioRequestDto(
         String nome,
 
         @NotBlank(message = "CNPJ é obrigatório")
-        @Size(min = 14, max = 14, message = "CNPJ deve ter 14 dígitos")
+        @Size(min = 14, max = 14, message = "CNPJ deve ter 14 dígitos puros") // Se estiver sem pontuação
         String cnpj,
 
         @NotBlank(message = "CEP é obrigatório")
-        @Size(min = 8, max = 9, message = "CEP deve ter 8 ou 9 caracteres (com ou sem hífen)")
+        @Size(min = 8, max = 8, message = "CEP deve ter 8 dígitos puros") // Espera apenas 8 dígitos
         String cep,
 
         @NotBlank(message = "Email é obrigatório")

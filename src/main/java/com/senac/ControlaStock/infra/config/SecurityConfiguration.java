@@ -18,41 +18,32 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Autowired
-    private JwtFilter jwtFilter;
+    // Comentando o filtro JWT, pois a segurança será desativada
+    //@Autowired
+    //private JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                // Desabilita CSRF (Cross-Site Request Forgery)
                 .csrf(csrf -> csrf.disable())
+
+                // Mantém a sessão como stateless, embora a autenticação não seja mais obrigatória
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // *** MUDANÇA PRINCIPAL: PERMITE QUALQUER REQUISIÇÃO EM QUALQUER ROTA ***
                 .authorizeHttpRequests(authorize -> authorize
-
-                        //  Rotas públicas (não exigem token)
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/registrar").permitAll()
-                        .requestMatchers("/health").permitAll()
-
-                        // Swagger liberado
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/api/cep/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
-                        .requestMatchers("/api/usuarios/perfil").authenticated()
-                        .requestMatchers("/api/inventario/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/product").hasRole("ADMIN")
-
-                        //  Todas as outras rotas exigem autenticação
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // Permite todas as requisições (públicas ou não)
                 )
 
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                // Remove a adição do filtro JWT, pois ele não é mais necessário
+                //.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .build();
     }
 
+    // Mantenha o AuthenticationManager e o PasswordEncoder, pois eles podem ser
+    // necessários para as funcionalidades internas de Login/Registro.
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration
