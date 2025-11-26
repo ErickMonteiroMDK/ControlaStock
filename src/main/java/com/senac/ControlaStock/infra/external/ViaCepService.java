@@ -1,7 +1,7 @@
 package com.senac.ControlaStock.infra.external;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.senac.ControlaStock.application.dto.endereco.EnderecoDto;
+import com.senac.ControlaStock.application.dto.endereco.EnderecoResponseDto;
 import com.senac.ControlaStock.application.ports.CepServicePort;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ public class ViaCepService implements CepServicePort {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public EnderecoDto buscarEnderecoPorCep(String cep) {
+    public EnderecoResponseDto buscarEnderecoPorCep(String cep) {
         try {
             String cepLimpo = cep.replaceAll("[^0-9]", "");
 
@@ -42,9 +42,9 @@ public class ViaCepService implements CepServicePort {
             in.close();
             conn.disconnect();
 
-            EnderecoDto endereco = objectMapper.readValue(
+            EnderecoResponseDto endereco = objectMapper.readValue(
                     response.toString(),
-                    EnderecoDto.class
+                    EnderecoResponseDto.class
             );
 
             if (endereco.erro() != null) {

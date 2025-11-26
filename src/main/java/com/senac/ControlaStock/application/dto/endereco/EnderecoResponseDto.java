@@ -1,6 +1,6 @@
 package com.senac.ControlaStock.application.dto.endereco;
 
-public record EnderecoDto(
+public record EnderecoResponseDto(
         String cep,
         String logradouro,
         String complemento,

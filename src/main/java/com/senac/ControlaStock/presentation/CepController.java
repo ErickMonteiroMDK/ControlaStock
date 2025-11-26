@@ -1,6 +1,6 @@
 package com.senac.ControlaStock.presentation;
 
-import com.senac.ControlaStock.application.dto.endereco.EnderecoDto;
+import com.senac.ControlaStock.application.dto.endereco.EnderecoResponseDto;
 import com.senac.ControlaStock.application.ports.CepServicePort;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,9 +18,9 @@ public class CepController {
 
     @GetMapping("/{cep}")
     @Operation(summary = "Busca endereço pelo CEP")
-    public ResponseEntity<EnderecoDto> buscarCep(@PathVariable String cep) {
+    public ResponseEntity<EnderecoResponseDto> buscarCep(@PathVariable String cep) {
         try {
-            EnderecoDto endereco = cepService.buscarEnderecoPorCep(cep);
+            EnderecoResponseDto endereco = cepService.buscarEnderecoPorCep(cep);
             return ResponseEntity.ok(endereco);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
