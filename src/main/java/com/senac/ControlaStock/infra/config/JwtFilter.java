@@ -1,7 +1,7 @@
 package com.senac.ControlaStock.infra.config;
 
 import com.senac.ControlaStock.application.services.TokenService;
-// REMOVEMOS: import com.senac.ControlaStock.domain.repository.UsuarioRepository;
+//import com.senac.ControlaStock.domain.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

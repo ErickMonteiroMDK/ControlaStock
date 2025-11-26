@@ -1,6 +1,7 @@
 package com.senac.ControlaStock.application.ports;
 
-public interface CepServicePort {
-    String buscarEnderecoPorCep(String cep);
-}
+import com.senac.ControlaStock.application.dto.endereco.EnderecoDto;
 
+public interface CepServicePort {
+    EnderecoDto buscarEnderecoPorCep(String cep); // Agora retorna DTO
+}

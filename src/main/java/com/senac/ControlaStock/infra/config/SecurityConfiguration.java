@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    // Comentando o filtro JWT, pois a segurança será desativada
     //@Autowired
     //private JwtFilter jwtFilter;
 
@@ -28,17 +27,13 @@ public class SecurityConfiguration {
                 // Desabilita CSRF (Cross-Site Request Forgery)
                 .csrf(csrf -> csrf.disable())
 
-                // Mantém a sessão como stateless, embora a autenticação não seja mais obrigatória
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // *** MUDANÇA PRINCIPAL: PERMITE QUALQUER REQUISIÇÃO EM QUALQUER ROTA ***
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll() // Permite todas as requisições (públicas ou não)
+                        .anyRequest().permitAll()
                 )
 
-                // Remove a adição do filtro JWT, pois ele não é mais necessário
                 //.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .build();
     }
 
